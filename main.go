@@ -35,11 +35,13 @@ func main() {
 // }
 
 type blogpost struct {
-	Id       string   `json:"_id,omitempty"`
-	Title    string   `json:"title"`
-	Content  string   `json:"content"`
-	Category string   `json:"category"`
-	Tags     []string `json:"tags"`
+	Id        string   `json:"_id,omitempty"`
+	Title     string   `json:"title"`
+	Content   string   `json:"content"`
+	Category  string   `json:"category"`
+	CreatedAt string   `json:"createdAt,omitempty"`
+	UpdatedAt string   `json:"updatedAt,omitempty"`
+	Tags      []string `json:"tags"`
 }
 
 // func PostHandler(w http.ResponseWriter, r *http.Request) {

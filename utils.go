@@ -26,39 +26,25 @@ func InitDbConnection() *mongo.Database {
 	db := client.Database("testdb")
 	// collection := db.Collection("testcollection")
 	return db
-	// fmt.Printf("%T\n", db)
-
-	// // doc := map[string]string{"name": "Abhay", "role": "DevOps"}
-	// doc := blogpost{
-	// 	Title:    "Test",
-	// 	Content:  "test content",
-	// 	Category: "Test",
-	// 	Tags:     []string{"test1"},
-	// }
-	// insertResult, err := collection.InsertOne(ctx, doc)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println("Inserted document ID:", insertResult.InsertedID)
 }
 
-func InsertDocument(db *mongo.Database, collname string, doc blogpost) {
+func InsertDocument(db *mongo.Database, collname string, doc blogpost) blogpost {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
+
 	collection := db.Collection(collname)
 	insertResult, err := collection.InsertOne(ctx, doc)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Inserted document type:%T", insertResult.InsertedID)
-	objectID, ok := insertResult.InsertedID.(bson.ObjectId)
+
+	objectID, ok := insertResult.InsertedID.(bson.ObjectID)
 	if !ok {
-		log.Fatal("InsertedID is not of type primitive.ObjectID")
+		log.Fatal("Error while fetching doc ID")
 	}
 	id := objectID.Hex()
-	// id := insertResult.InsertedID.(primitive.ObjectID).Hex()
 
-	var result bson.D
+	var result blogpost
 	err = collection.FindOne(ctx, bson.M{"_id": insertResult.InsertedID}).Decode(&result)
 	if err != nil {
 		log.Fatal("Could not find inserted document:", err)
@@ -66,5 +52,24 @@ func InsertDocument(db *mongo.Database, collname string, doc blogpost) {
 	result.Id = id
 
 	fmt.Printf("✅ Retrieved document: %+v\n", result)
+
+	return result
+
+}
+
+func UpdateDocument(db *mongo.Database, collectionName string, filter bson.M, update bson.M) blogpost {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	collection := db.Collection(collectionName)
+	opts := options.FindOneAndUpdate().SetReturnDocument(options.After)
+
+	var updatedDoc bson.M
+	err := collection.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDoc)
+	if err != nil {
+		log.Fatalf("FindOneAndUpdate failed: %v", err)
+	}
+
+	fmt.Printf("✅ Updated document: %+v\n", updatedDoc)
 
 }
