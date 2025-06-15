@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 const port = "8080"
@@ -15,14 +18,20 @@ func main() {
 
 	// log.Fatal(server.ListenAndServe())
 	doc := blogpost{
-		Title:    "Test2",
-		Content:  "test content",
-		Category: "Test",
+		Title:    "Test3",
+		Content:  "test content is updated again",
+		Category: "Test3",
 		Tags:     []string{"test1"},
 	}
 	a := InitDbConnection()
 	fmt.Printf("%T\n", a)
-	InsertDocument(a, "testcol", doc)
+	// InsertDocument(a, "testcol", doc)
+	oid, err := bson.ObjectIDFromHex("684efb41f49d8b764c210c7b")
+	if err != nil {
+		log.Fatal("Invalid ObjectID:", err)
+	}
+	filter := bson.M{"_id": oid}
+	UpdateDocument(a, "testcol", filter, doc)
 
 }
 

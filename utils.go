@@ -28,7 +28,7 @@ func InitDbConnection() *mongo.Database {
 	return db
 }
 
-func InsertDocument(db *mongo.Database, collname string, doc blogpost) blogpost {
+func InsertDocument(db *mongo.Database, collname string, doc blogpost) bson.M {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
@@ -38,18 +38,17 @@ func InsertDocument(db *mongo.Database, collname string, doc blogpost) blogpost 
 		log.Fatal(err)
 	}
 
-	objectID, ok := insertResult.InsertedID.(bson.ObjectID)
-	if !ok {
-		log.Fatal("Error while fetching doc ID")
-	}
-	id := objectID.Hex()
+	// objectID, ok := insertResult.InsertedID.(bson.ObjectID)
+	// if !ok {
+	// 	log.Fatal("Error while fetching doc ID")
+	// }
+	// id := objectID.Hex()
 
-	var result blogpost
+	var result bson.M
 	err = collection.FindOne(ctx, bson.M{"_id": insertResult.InsertedID}).Decode(&result)
 	if err != nil {
 		log.Fatal("Could not find inserted document:", err)
 	}
-	result.Id = id
 
 	fmt.Printf("✅ Retrieved document: %+v\n", result)
 
@@ -57,12 +56,21 @@ func InsertDocument(db *mongo.Database, collname string, doc blogpost) blogpost 
 
 }
 
-func UpdateDocument(db *mongo.Database, collectionName string, filter bson.M, update bson.M) blogpost {
+func UpdateDocument(db *mongo.Database, collectionName string, filter bson.M, doc blogpost) bson.M {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	collection := db.Collection(collectionName)
 	opts := options.FindOneAndUpdate().SetReturnDocument(options.After)
+
+	update := bson.M{
+		"$set": bson.M{
+			"title":    doc.Title,
+			"content":  doc.Content,
+			"category": doc.Category,
+			"tags":     doc.Tags,
+		},
+	}
 
 	var updatedDoc bson.M
 	err := collection.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDoc)
@@ -71,5 +79,6 @@ func UpdateDocument(db *mongo.Database, collectionName string, filter bson.M, up
 	}
 
 	fmt.Printf("✅ Updated document: %+v\n", updatedDoc)
+	return updatedDoc
 
 }
