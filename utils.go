@@ -56,6 +56,33 @@ func InsertDocument(db *mongo.Database, collname string, doc blogpost) bson.M {
 
 }
 
+// func FindDocument(db *mongo.Database, collectionName string, filter bson.M, doc blogpost) bson.M {
+// 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+// 	defer cancel()
+
+// 	collection := db.Collection(collectionName)
+// 	opts := options.FindOneAndUpdate().SetReturnDocument(options.After)
+
+// 	update := bson.M{
+// 		"$set": bson.M{
+// 			"title":    doc.Title,
+// 			"content":  doc.Content,
+// 			"category": doc.Category,
+// 			"tags":     doc.Tags,
+// 		},
+// 	}
+
+// 	var updatedDoc bson.M
+// 	err := collection.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDoc)
+// 	if err != nil {
+// 		log.Fatalf("FindOneAndUpdate failed: %v", err)
+// 	}
+
+// 	fmt.Printf("✅ Updated document: %+v\n", updatedDoc)
+// 	return updatedDoc
+
+// }
+
 func UpdateDocument(db *mongo.Database, collectionName string, filter bson.M, doc blogpost) bson.M {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
@@ -80,5 +107,23 @@ func UpdateDocument(db *mongo.Database, collectionName string, filter bson.M, do
 
 	fmt.Printf("✅ Updated document: %+v\n", updatedDoc)
 	return updatedDoc
+
+}
+
+func DeleteDocument(db *mongo.Database, collectionName string, filter bson.M) bson.M {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	collection := db.Collection(collectionName)
+	opts := options.FindOneAndDelete()
+
+	var deletedDoc bson.M
+	err := collection.FindOneAndDelete(ctx, filter, opts).Decode(&deletedDoc)
+	if err != nil {
+		log.Fatalf("FindOneAndDelete failed: %v", err)
+	}
+
+	fmt.Printf("✅ Deleted document: %+v\n", deletedDoc)
+	return deletedDoc
 
 }

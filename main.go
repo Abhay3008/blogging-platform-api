@@ -17,12 +17,12 @@ func main() {
 	// }
 
 	// log.Fatal(server.ListenAndServe())
-	doc := blogpost{
-		Title:    "Test3",
-		Content:  "test content is updated again",
-		Category: "Test3",
-		Tags:     []string{"test1"},
-	}
+	// doc := blogpost{
+	// 	Title:    "Test3",
+	// 	Content:  "test content is updated again1",
+	// 	Category: "Test3",
+	// 	Tags:     []string{"test1"},
+	// }
 	a := InitDbConnection()
 	fmt.Printf("%T\n", a)
 	// InsertDocument(a, "testcol", doc)
@@ -31,7 +31,8 @@ func main() {
 		log.Fatal("Invalid ObjectID:", err)
 	}
 	filter := bson.M{"_id": oid}
-	UpdateDocument(a, "testcol", filter, doc)
+	// UpdateDocument(a, "testcol", filter, doc)
+	DeleteDocument(a, "testcol", filter)
 
 }
 
